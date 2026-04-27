@@ -1,0 +1,297 @@
+/*
+ * ---------------------------------------------------
+ *                ESTRUCTURAS DE DATOS
+ * ---------------------------------------------------
+ *              Manuel Montenegro Montes
+ *              Facultad de Informática
+ *         Universidad Complutense de Madrid
+ * ---------------------------------------------------
+ */
+
+/*
+ * Implementación del TAD Lista mediante listas doblemente enlazadas circulares.
+ *
+ * Esta versión introduce genericidad mediante plantillas.
+ */
+
+#ifndef __LIST_LINKED_DOUBLE_H
+#define __LIST_LINKED_DOUBLE_H
+
+#include <cassert>
+#include <iostream>
+#include <string>
+
+template <typename Elem> class ListLinkedDouble {
+private:
+  struct Node {
+    Elem value;
+    Node *next;
+    Node *prev;
+  };
+
+public:
+  ListLinkedDouble() : num_elems(0) {
+    head = new Node;
+    head->next = head;
+    head->prev = head;
+  }
+
+  ListLinkedDouble(const ListLinkedDouble &other) : ListLinkedDouble() {
+    copy_nodes_from(other);
+    num_elems = other.num_elems;
+  }
+
+  ~ListLinkedDouble() { delete_nodes(); }
+
+  void push_front(const Elem &elem) {
+    Node *new_node = new Node{elem, head->next, head};
+    head->next->prev = new_node;
+    head->next = new_node;
+    num_elems++;
+  }
+
+  void push_back(const Elem &elem) {
+    Node *new_node = new Node{elem, head, head->prev};
+    head->prev->next = new_node;
+    head->prev = new_node;
+    num_elems++;
+  }
+
+  void pop_front() {
+    assert(num_elems > 0);
+    Node *target = head->next;
+    head->next = target->next;
+    target->next->prev = head;
+    delete target;
+    num_elems--;
+  }
+
+  void pop_back() {
+    assert(num_elems > 0);
+    Node *target = head->prev;
+    target->prev->next = head;
+    head->prev = target->prev;
+    delete target;
+    num_elems--;
+  }
+
+  int size() const { return num_elems; }
+
+  bool empty() const { return num_elems == 0; };
+
+  const Elem &front() const {
+    assert(num_elems > 0);
+    return head->next->value;
+  }
+
+  Elem &front() {
+    assert(num_elems > 0);
+    return head->next->value;
+  }
+
+  const Elem &back() const {
+    assert(num_elems > 0);
+    return head->prev->value;
+  }
+
+  Elem &back() {
+    assert(num_elems > 0);
+    return head->prev->value;
+  }
+
+  const Elem &operator[](int index) const {
+    assert(0 <= index && index < num_elems);
+    Node *result_node = nth_node(index);
+    return result_node->value;
+  }
+
+  Elem &operator[](int index) {
+    assert(0 <= index && index < num_elems);
+    Node *result_node = nth_node(index);
+    return result_node->value;
+  }
+
+  ListLinkedDouble &operator=(const ListLinkedDouble &other) {
+    if (this != &other) {
+      delete_nodes();
+      head = new Node;
+      head->next = head->prev = head;
+      copy_nodes_from(other);
+      num_elems = other.num_elems;
+    }
+    return *this;
+  }
+
+  void display(std::ostream &out) const;
+
+  void display() const { display(std::cout); }
+
+    void rdisplay(std::ostream &out) const;
+
+  void rdisplay() const {rdisplay(std::cout); }
+
+
+  void zip(ListLinkedDouble& other) {
+      Node* mio = head->next->next;
+      Node* tuyo = other.head->next;
+      while (mio != head && tuyo != other.head) {
+          detach(tuyo);
+          attach(tuyo, mio);
+          this->num_elems++;
+          other.num_elems--;
+          mio = mio->next;
+          tuyo = other.head->next;
+          
+      }
+      if (tuyo != other.head) {
+          while (tuyo != other.head) {
+              detach(tuyo);
+              attach(tuyo, mio);
+              this->num_elems++;
+              other.num_elems--;
+              tuyo = other.head->next;
+          }
+      }
+  }
+  void unzip(ListLinkedDouble& other) {
+      Node* pos = head->next->next;
+      Node* zp = other.head;
+      Node* p = pos->next;
+      
+      while (pos != head ) {
+          p = pos->next;
+          this->detach(pos);
+          other.attach(pos,zp);
+          this->num_elems--;
+          other.num_elems++;
+          
+          if (p != head)
+              pos = p->next;
+          else
+              pos = head;
+          
+      }
+  }
+  void partition(int pivot){
+    Node *pos = head->next;
+    Node *last = head;
+    int n = num_elems;
+
+    for(int i =0; i < n;i++){
+      Node *next = pos->next;
+      if(pos->value > pivot){
+        detach(pos);
+        attach(pos,head);
+        pos = next;
+       
+      }
+      else{
+          pos = pos->next;
+          last = last->next;
+      }
+    }
+    
+      
+  }
+private:
+  Node *head;
+  int num_elems;
+
+  Node *nth_node(int n) const;
+  void delete_nodes();
+  void copy_nodes_from(const ListLinkedDouble &other);
+  void detach(Node* n);
+  void   attach(Node* n, Node* pos);
+};
+
+template <typename Elem>
+typename ListLinkedDouble<Elem>::Node *
+ListLinkedDouble<Elem>::nth_node(int n) const {
+  int current_index = 0;
+  Node *current = head->next;
+
+  while (current_index < n && current != head) {
+    current_index++;
+    current = current->next;
+  }
+
+  return current;
+}
+
+template <typename Elem> void ListLinkedDouble<Elem>::delete_nodes() {
+  Node *current = head->next;
+  while (current != head) {
+    Node *target = current;
+    current = current->next;
+    delete target;
+  }
+
+  delete head;
+}
+
+template <typename Elem>
+void ListLinkedDouble<Elem>::copy_nodes_from(const ListLinkedDouble &other) {
+  Node *current_other = other.head->next;
+  Node *last = head;
+
+  while (current_other != other.head) {
+    Node *new_node = new Node{current_other->value, head, last};
+    last->next = new_node;
+    last = new_node;
+    current_other = current_other->next;
+  }
+  head->prev = last;
+}
+
+template <typename Elem>
+void ListLinkedDouble<Elem>::display(std::ostream &out) const {
+  out << "[";
+  if (head->next != head) {
+    out << head->next->value;
+    Node *current = head->next->next;
+    while (current != head) {
+      out << ", " << current->value;
+      current = current->next;
+    }
+  }
+  out << "]";
+}
+template <typename Elem>
+void ListLinkedDouble<Elem>::rdisplay(std::ostream &out) const {
+  out << "[";
+  if (head->prev != head) {
+    out << head->prev->value;
+    Node *current = head->prev->prev; // ← segundo desde el final
+    while (current != head) {
+      out << ", " << current->value;
+      current = current->prev;        // ← hacia atrás
+    }
+  }
+  out << "]";
+}
+template <typename Elem>
+void ListLinkedDouble<Elem>::detach(Node* n) {
+    assert(n != head);
+    n->prev->next = n->next;
+    n->next->prev = n->prev;
+    n->prev = nullptr;
+    n->next = nullptr;
+}
+ 
+  
+template <typename Elem>
+void ListLinkedDouble<Elem>::attach(Node* n, Node* pos) {
+    n->next = pos;
+    n->prev = pos->prev;
+    pos->prev->next = n;
+    pos->prev = n;
+}
+
+template <typename Elem>
+std::ostream &operator<<(std::ostream &out, const ListLinkedDouble<Elem> &l) {
+  l.display(out);
+  return out;
+}
+
+
+#endif
