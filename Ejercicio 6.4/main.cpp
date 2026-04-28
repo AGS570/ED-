@@ -17,7 +17,7 @@ void resolver(const BinTree<int>& tree,int &maxGente, int &p, int &equipos) {
 
    if(tree.empty()){  
       return;
-   }else p++;;
+   };
    
   int gi = 0;
   int gd = 0;
@@ -42,39 +42,6 @@ void resolver(const BinTree<int>& tree,int &maxGente, int &p, int &equipos) {
   }else{
     equipos = equiposI + equiposD;
   }
-   /*
- 
-
-
-
-  if(tree.root() == 0){
-    resolver(tree.right(), maxGente, p, equiposD);
-    resolver(tree.left(), maxGente, p, equiposI);
-  }else{
-    
-  resolver(tree.right(), gd, pd, equiposD);
-  resolver(tree.left(), gi, pi, equiposI);
-  
-  int gm = max(gd,gi);
-  int mi = min(gd,gi);
-  
-  if(equiposI == 0 && equiposD == 0){
-    equipos++;
-  }else{
-    equipos = equiposI + equiposD;
-  }
-  gm += tree.root();
-  maxGente += gm;
-  
-  p = 1+min(pi, pd);
-  
-  
-}
-*/
-   
-
-  // int mx  = 1 + pi + pd;
-  // m = max(mx, max(ai, ad));
    
 }
 
