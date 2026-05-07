@@ -15,10 +15,12 @@ bool resolver(const BinTree<char>& tree, int &z) {
       z =0;
       return true;
    }
+   
    if(tree.left().empty() && tree.right().empty()){
       z = 1;
       return true;
    }
+   
 
    int izq = 0,der = 0;
    bool l = resolver(tree.left(),izq);

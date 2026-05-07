@@ -13,7 +13,7 @@ void resolver(const BinTree<char>& tree, int &n, int &h, int &a) {
    
    if (tree.empty()) { 
       return;
-   }else n++;
+   }
 
    if (tree.right().empty() && tree.left().empty()) {
       h++;
@@ -21,11 +21,12 @@ void resolver(const BinTree<char>& tree, int &n, int &h, int &a) {
 
    int ai = 0;
    int ad = 0;
-      
-   resolver(tree.right(), n, h, ad);
-   resolver(tree.left(), n, h, ai);
+   int ni =0;
+   int nd =0;
+   resolver(tree.right(), ni, h, ad);
+   resolver(tree.left(), nd, h, ai);
    a = 1+max(ai, ad);
-   
+   n = 1+ ni + nd;
 }
 
 // resuelve un caso de prueba, leyendo de la entrada la
